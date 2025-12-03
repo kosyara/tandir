@@ -90,7 +90,7 @@
 
 <div id="gameArea">
     <div id="tandir"></div>
-    <img id="kovsh" src="https://i.imgur.com/gjFqpqS.png">
+    <img id="kovsh" src="kovsh.png">
 </div>
 
 <div id="hpBar">
@@ -104,50 +104,80 @@
 <script>
 let hp = 100;
 
-// картинки тандыра
+// стадии тандыра
 const tandirStages = [
-    "https://i.imgur.com/U5Qjio8.png", // без трещин
-    "https://i.imgur.com/odTg0zV.png", // маленькие трещины
-    "https://i.imgur.com/g8GxQ4H.png", // большие трещины
-    "https://i.imgur.com/VkrslEB.png"  // почти сломан
+    "damage1.png", // целый
+    "damage2.png", // трещины средние
+    "damage3.png", // большие трещины
+    "damage4.png"  // почти сломан / разрушение
 ];
 
-document.getElementById("tandir").style.backgroundImage = `url(${tandirStages[0]})`;
+const tandir = document.getElementById("tandir");
+const hpFill = document.getElementById("hpFill");
+const logBox = document.getElementById("log");
+const btn = document.getElementById("hitBtn");
+const kovsh = document.getElementById("kovsh");
 
-document.getElementById("hitBtn").onclick = function () {
+// начальная картинка
+tandir.style.backgroundImage = `url(${tandirStages[0]})`;
+
+btn.onclick = hitFunction;
+
+// --------------------------------------------------
+// Функция удара
+// --------------------------------------------------
+function hitFunction() {
     if (hp <= 0) return;
 
-    // урон 10–25
     let dmg = Math.floor(Math.random() * 15) + 10;
     hp -= dmg;
     if (hp < 0) hp = 0;
 
-    document.getElementById("hpFill").style.width = hp + "%";
-    document.getElementById("log").innerText = `Ты ударил ковшом и нанёс ${dmg} урона!`;
+    hpFill.style.width = hp + "%";
+    logBox.innerText = `Ты ударил ковшом и нанёс ${dmg} урона!`;
 
-    let tandir = document.getElementById("tandir");
+    // тряска тандыра
     tandir.classList.add("shake");
     setTimeout(() => tandir.classList.remove("shake"), 100);
 
-    // Анимация ковша
-    let kovsh = document.getElementById("kovsh");
+    // анимация ковша
     kovsh.style.transform = "rotate(-50deg)";
     setTimeout(() => { kovsh.style.transform = "rotate(0deg)"; }, 120);
 
-    // смена стадии трещин
+    // смена стадии
     if (hp > 75) tandir.style.backgroundImage = `url(${tandirStages[0]})`;
     else if (hp > 50) tandir.style.backgroundImage = `url(${tandirStages[1]})`;
     else if (hp > 25) tandir.style.backgroundImage = `url(${tandirStages[2]})`;
     else tandir.style.backgroundImage = `url(${tandirStages[3]})`;
 
-    // разрушение тандыра
-    if (hp <= 0) {
-        document.getElementById("log").innerHTML = "🔥 Тандыр разрушен! Победа!";
-        document.getElementById("hitBtn").disabled = true;
-        document.getElementById("hitBtn").innerText = "Готово";
-        document.getElementById("tandir").style.transform = "scale(0.8) rotate(10deg)";
-    }
-};
+    // если тандыр разрушен
+    if (hp <= 0) endGame();
+}
+
+// --------------------------------------------------
+// Конец игры
+// --------------------------------------------------
+function endGame() {
+    logBox.innerHTML = "🔥 Тандыр разрушен!";
+    btn.innerText = "Заново";
+    btn.onclick = restartGame;
+
+    tandir.style.transform = "scale(0.8) rotate(10deg)";
+}
+
+// --------------------------------------------------
+// Рестарт игры
+// --------------------------------------------------
+function restartGame() {
+    hp = 100;
+    hpFill.style.width = "100%";
+    logBox.innerText = "";
+    tandir.style.transform = "scale(1) rotate(0deg)";
+    tandir.style.backgroundImage = `url(${tandirStages[0]})`;
+
+    btn.innerText = "УДАРИТЬ КОВШОМ";
+    btn.onclick = hitFunction;
+}
 </script>
 
 </body>
